@@ -7,21 +7,22 @@ A complete, beginner-friendly machine learning project using Logistic Regression
 ## 📁 Project Structure
 
 
-logistic_regression_project/
-│
-├── logistic_regression.py ← Main ML script (run this)
-├── requirements.txt ← Python dependencies
-├── README.md ← You are here
-│
-└── outputs/ ← Auto-created when you run the script
-├── dataset_head.csv First 5 rows of the dataset
-├── metrics.csv Accuracy, Precision, Recall, F1
-├── confusion_matrix.png Confusion matrix heatmap
-├── metrics_chart.png Bar chart of all 4 metrics
-├── precision_recall_curve.png
-├── roc_curve.png
-└── feature_importance.png Top 15 features by coefficient
+## 📁 Project Structure
 
+logistic_regression_project/  
+│  
+├── logistic_regression.py   ← Main ML script (run this)  
+├── requirements.txt         ← Python dependencies  
+├── README.md                ← You are here  
+│  
+└── outputs/                 ← Auto-created when you run the script  
+├── dataset_head.csv         First 5 rows of the dataset  
+├── metrics.csv              Accuracy, Precision, Recall, F1  
+├── confusion_matrix.png     Confusion matrix heatmap  
+├── metrics_chart.png        Bar chart of all 4 metrics  
+├── precision_recall_curve.png  
+├── roc_curve.png  
+└── feature_importance.png   Top 15 features by coefficient  
 
 ---
 
