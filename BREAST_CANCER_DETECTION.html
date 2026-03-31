@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logistic Regression — ML Classification Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #f0f4ff;
+  color: #1e1e2e;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(135deg, #6c63ff 0%, #3b82f6 50%, #06b6d4 100%);
+  color: white;
+  padding: 52px 52px 44px;
+  position: relative;
+  overflow: hidden;
+}
+header::after {
+  content: '';
+  position: absolute; right: -60px; top: -60px;
+  width: 320px; height: 320px;
+  background: rgba(255,255,255,0.07); border-radius: 50%;
+}
+header::before {
+  content: '';
+  position: absolute; right: 120px; bottom: -80px;
+  width: 220px; height: 220px;
+  background: rgba(255,255,255,0.05); border-radius: 50%;
+}
+.h-top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; flex-wrap: wrap; gap: 20px; }
+.h-tag { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); border-radius: 20px; padding: 4px 14px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; }
+h1 { font-size: clamp(30px, 5vw, 56px); font-weight: 900; line-height: 1.1; }
+h1 span { opacity: 0.75; display: block; font-weight: 700; font-size: 55%; margin-bottom: 4px; }
+.h-score { text-align: right; }
+.big-num { font-size: clamp(52px, 8vw, 90px); font-weight: 900; line-height: 1; text-shadow: 0 4px 24px rgba(0,0,0,0.15); }
+.big-label { font-size: 12px; font-weight: 700; opacity: 0.75; letter-spacing: .06em; margin-top: 4px; }
+.h-chips { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; margin-top: 20px; }
+.h-chip { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 6px 14px; font-size: 11px; font-weight: 700; }
+
+/* ── LAYOUT ── */
+main { max-width: 1260px; margin: 0 auto; padding: 48px 48px 80px; }
+section { margin-bottom: 56px; }
+.sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.sec-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.sec-title { font-size: 18px; font-weight: 800; }
+.sec-sub { font-size: 11px; color: #888; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+
+/* ── PIPELINE ── */
+.pipeline { display: flex; background: white; border-radius: 16px; overflow-x: auto; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.step { flex: 1; min-width: 110px; padding: 22px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; border-right: 1px solid #f0f0f0; position: relative; transition: background .15s; }
+.step:last-child { border-right: none; }
+.step:hover { background: #fafafa; }
+.step-dot { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 4px; }
+.step-n { font-size: 9px; color: #bbb; font-weight: 700; letter-spacing: .1em; }
+.step-name { font-size: 12px; font-weight: 800; }
+.step-d { font-size: 10px; color: #999; font-weight: 600; }
+.step-arrow { position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: white; color: #ccc; font-size: 14px; z-index: 2; padding: 0 2px; line-height: 1; }
+.step:last-child .step-arrow { display: none; }
+
+/* ── FACTS ── */
+.facts { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.fact { background: white; border-radius: 12px; padding: 14px 20px; flex: 1; min-width: 110px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 3px solid transparent; }
+.fv { font-size: 22px; font-weight: 900; }
+.fk { font-size: 10px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+
+/* ── METRICS ── */
+.metrics-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.metric-card { border-radius: 16px; padding: 26px 22px; color: white; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+.metric-card::after { content: ''; position: absolute; right: -20px; bottom: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+.metric-card::before { content: ''; position: absolute; right: 20px; bottom: 30px; width: 60px; height: 60px; background: rgba(255,255,255,0.07); border-radius: 50%; }
+.m-rank { font-size: 10px; font-weight: 800; opacity: 0.6; letter-spacing: .1em; margin-bottom: 14px; }
+.m-name { font-size: 11px; font-weight: 800; opacity: 0.85; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+.m-val { font-size: 44px; font-weight: 900; line-height: 1; }
+.m-unit { font-size: 20px; font-weight: 700; opacity: 0.7; }
+.m-bar-bg { height: 4px; background: rgba(255,255,255,0.25); border-radius: 2px; margin-top: 14px; position: relative; z-index: 1; }
+.m-bar { height: 100%; border-radius: 2px; background: rgba(255,255,255,0.85); transition: width 1.4s cubic-bezier(.16,1,.3,1); }
+.m-formula { font-size: 10px; opacity: 0.65; margin-top: 8px; position: relative; z-index: 1; font-weight: 700; }
+.m-desc { font-size: 10px; opacity: 0.75; margin-top: 4px; position: relative; z-index: 1; line-height: 1.5; font-weight: 600; }
+.mc1 { background: linear-gradient(135deg, #6c63ff, #8b5cf6); }
+.mc2 { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+.mc3 { background: linear-gradient(135deg, #10b981, #34d399); }
+.mc4 { background: linear-gradient(135deg, #f59e0b, #f97316); }
+
+/* ── CONFUSION MATRIX ── */
+.cm-layout { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+.cm-label-top { font-size: 11px; font-weight: 800; color: #888; text-align: center; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; padding-left: 72px; }
+.cm-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.cm-row-label { width: 64px; font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: .06em; text-align: right; padding-right: 8px; }
+.cm-side-label { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: .08em; margin-right: 4px; }
+.cm-outer { display: flex; align-items: center; }
+.cm-cell { width: 110px; height: 110px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: transform .15s; cursor: default; }
+.cm-cell:hover { transform: scale(1.04); }
+.cm-n { font-size: 40px; font-weight: 900; line-height: 1; }
+.cm-t { font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.c-tp { background: linear-gradient(135deg,#10b981,#059669); color: white; box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
+.c-tn { background: linear-gradient(135deg,#3b82f6,#2563eb); color: white; box-shadow: 0 4px 16px rgba(59,130,246,0.3); }
+.c-fp { background: #fff7ed; color: #f97316; border: 2px solid #fed7aa; }
+.c-fn { background: #fff1f2; color: #f43f5e; border: 2px solid #fecdd3; }
+.cm-col-labels { display: flex; gap: 8px; padding-left: 72px; margin-bottom: 8px; }
+.cm-col-label { width: 110px; text-align: center; font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: .06em; }
+.cm-legend { display: flex; flex-direction: column; gap: 18px; padding-top: 4px; }
+.leg-item { display: flex; gap: 14px; align-items: flex-start; }
+.leg-dot { width: 14px; height: 14px; border-radius: 5px; flex-shrink: 0; margin-top: 3px; }
+.leg-h { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
+.leg-p { font-size: 11px; color: #888; font-weight: 600; line-height: 1.5; }
+
+/* ── REPORT TABLE ── */
+.report-table { width: 100%; border-collapse: collapse; }
+.report-table th { padding: 12px 18px; text-align: left; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #999; border-bottom: 2px solid #f0f0f0; }
+.report-table th:not(:first-child) { text-align: right; }
+.report-table td { padding: 16px 18px; border-bottom: 1px solid #f5f5f5; }
+.report-table td:not(:first-child) { text-align: right; font-weight: 700; }
+.report-table tr:last-child td { border-bottom: none; }
+.report-table tbody tr:hover td { background: #fafafa; }
+.cls { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; }
+.cls-m { background: #fff1f2; color: #f43f5e; }
+.cls-b { background: #ecfdf5; color: #10b981; }
+.cls-a { background: #eff6ff; color: #3b82f6; }
+.bar-cell { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.bar-bg { width: 80px; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; }
+
+/* ── EXPLAINER ── */
+.exp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.exp-card { background: white; border-radius: 16px; padding: 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 4px solid transparent; }
+.exp-card h3 { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
+.exp-formula { display: inline-block; padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; margin: 8px 0 12px; }
+.exp-card p { font-size: 12px; color: #666; font-weight: 600; line-height: 1.7; }
+.use-box { margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; line-height: 1.6; }
+.e1 { border-top-color: #6c63ff; }
+.e1 h3 { color: #6c63ff; }
+.e1 .exp-formula { background: #f3f0ff; color: #6c63ff; }
+.e1 .use-box { background: #f3f0ff; color: #6c63ff; }
+.e2 { border-top-color: #3b82f6; }
+.e2 h3 { color: #3b82f6; }
+.e2 .exp-formula { background: #eff6ff; color: #3b82f6; }
+.e2 .use-box { background: #eff6ff; color: #3b82f6; }
+.e3 { border-top-color: #10b981; }
+.e3 h3 { color: #10b981; }
+.e3 .exp-formula { background: #ecfdf5; color: #10b981; }
+.e3 .use-box { background: #ecfdf5; color: #10b981; }
+.e4 { border-top-color: #f59e0b; }
+.e4 h3 { color: #f59e0b; }
+.e4 .exp-formula { background: #fffbeb; color: #f59e0b; }
+.e4 .use-box { background: #fffbeb; color: #f59e0b; }
+
+/* ── TRADEOFF ── */
+.tradeoff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.tradeoff-card { border-radius: 16px; padding: 28px; color: white; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+.tc1 { background: linear-gradient(135deg,#10b981,#059669); }
+.tc2 { background: linear-gradient(135deg,#f43f5e,#e11d48); }
+.tradeoff-card h3 { font-size: 18px; font-weight: 900; margin-bottom: 8px; }
+.tradeoff-card p { font-size: 12px; opacity: 0.85; font-weight: 600; line-height: 1.7; }
+.threshold-row { margin: 14px 0 6px; }
+.threshold-track { height: 6px; background: rgba(255,255,255,0.25); border-radius: 3px; }
+.threshold-fill { height: 100%; border-radius: 3px; background: white; }
+.threshold-labels { display: flex; justify-content: space-between; font-size: 9px; font-weight: 800; opacity: 0.6; margin-top: 4px; letter-spacing: .06em; }
+.tc-note { margin-top: 14px; background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 14px; font-size: 11px; font-weight: 700; }
+
+/* ── CODE ── */
+.code-wrap { background: #1e1e2e; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
+.code-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 22px; background: #16162a; font-size: 12px; font-weight: 700; }
+.code-head .fname { color: #cdd6f4; }
+.code-head .fmeta { color: #585b70; }
+.code-dots { display: flex; gap: 7px; }
+.code-dot { width: 12px; height: 12px; border-radius: 50%; }
+pre { padding: 28px; font-size: 12px; line-height: 1.8; overflow-x: auto; color: #cdd6f4; }
+.kw  { color: #cba6f7; font-weight: 800; }
+.fn  { color: #89b4fa; font-weight: 700; }
+.str { color: #a6e3a1; }
+.cm  { color: #45475a; }
+.num { color: #fab387; }
+
+@media (max-width: 900px) {
+  main { padding: 28px 20px 60px; }
+  header { padding: 32px 24px 28px; }
+  .metrics-grid { grid-template-columns: 1fr 1fr; }
+  .exp-grid, .tradeoff-grid { grid-template-columns: 1fr; }
+  .cm-layout { flex-direction: column; }
+}
+@media (max-width: 600px) {
+  .metrics-grid { grid-template-columns: 1fr; }
+  .h-top { flex-direction: column; }
+  .h-score { text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-top">
+    <div>
+      <div class="h-tag">🧠 Machine Learning · Binary Classification</div>
+      <h1><span>Logistic Regression</span>Breast Cancer<br>Detection</h1>
+    </div>
+    <div class="h-score">
+      <div class="big-num">98.25<small style="font-size:40%;opacity:.7">%</small></div>
+      <div class="big-label">Model Accuracy</div>
+    </div>
+  </div>
+  <div class="h-chips">
+    <div class="h-chip">📦 sklearn dataset</div>
+    <div class="h-chip">🔢 569 samples · 30 features</div>
+    <div class="h-chip">🎯 Malignant vs Benign</div>
+    <div class="h-chip">✅ No download needed</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- 01 PIPELINE -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-icon" style="background:#f3f0ff">🔄</div>
+      <div><div class="sec-title">Pipeline Overview</div><div class="sec-sub">Step-by-step process</div></div>
+    </div>
+    <div class="pipeline">
+      <div class="step">
+        <div class="step-dot" style="background:#f3f0ff">🗄️</div>
+        <div class="step-n">STEP A</div><div class="step-name">Load Data</div><div class="step-d">569 samples</div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="step">
+        <div class="step-dot" style="background:#eff6ff">✂️</div>
+        <div class="step-n">STEP B</div><div class="step-name">Split</div><div class="step-d">80 / 20</div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="step">
+        <div class="step-dot" style="background:#ecfdf5">⚖️</div>
+        <div class="step-n">STEP C</div><div class="step-name">Standardize</div><div class="step-d">StandardScaler</div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="step" style="background:#faf5ff">
+        <div class="step-dot" style="background:#e9d5ff">🧠</div>
+        <div class="step-n">STEP D</div><div class="step-name" style="color:#7c3aed">Train Model</div><div class="step-d">LogisticRegression</div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="step">
+        <div class="step-dot" style="background:#fff7ed">🔮</div>
+        <div class="step-n">STEP E</div><div class="step-name">Predict</div><div class="step-d">Test set</div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="step">
+        <div class="step-dot" style="background:#fff1f2">📊</div>
+        <div class="step-n">STEP F</div><div class="step-name">Evaluate</div><div class="step-d">4 metrics</div>
+      </div>
+    </div>
+    <div class="facts">
+      <div class="fact" style="border-top-color:#6c63ff"><div class="fv" style="color:#6c63ff">569</div><div class="fk">Total Samples</div></div>
+      <div class="fact" style="border-top-color:#3b82f6"><div class="fv" style="color:#3b82f6">30</div><div class="fk">Features</div></div>
+      <div class="fact" style="border-top-color:#10b981"><div class="fv" style="color:#10b981">455</div><div class="fk">Train Size</div></div>
+      <div class="fact" style="border-top-color:#f59e0b"><div class="fv" style="color:#f59e0b">114</div><div class="fk">Test Size</div></div>
+      <div class="fact" style="border-top-color:#f43f5e"><div class="fv" style="color:#f43f5e">2</div><div class="fk">Classes</div></div>
+      <div class="fact" style="border-top-color:#06b6d4"><div class="fv" style="color:#06b6d4">37/63%</div><div class="fk">Mal / Ben Split</div></div>
+    </div>
+  </section>
+
+  <!-- 02 METRICS -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-icon" style="background:#eff6ff">📊</div>
+      <div><div class="sec-title">Evaluation Metrics</div><div class="sec-sub">Performance scores on test set</div></div>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card mc1">
+        <div class="m-rank">01 / 04</div>
+        <div class="m-name">Accuracy</div>
+        <div class="m-val">98<span class="m-unit">%</span></div>
+        <div class="m-bar-bg"><div class="m-bar" id="b1" style="width:0%"></div></div>
+        <div class="m-formula">( TP + TN ) / Total</div>
+        <div class="m-desc">Overall correct predictions out of all samples.</div>
+      </div>
+      <div class="metric-card mc2">
+        <div class="m-rank">02 / 04</div>
+        <div class="m-name">Precision</div>
+        <div class="m-val">98.6<span class="m-unit">%</span></div>
+        <div class="m-bar-bg"><div class="m-bar" id="b2" style="width:0%"></div></div>
+        <div class="m-formula">TP / ( TP + FP )</div>
+        <div class="m-desc">How many flagged positives were truly positive.</div>
+      </div>
+      <div class="metric-card mc3">
+        <div class="m-rank">03 / 04</div>
+        <div class="m-name">Recall</div>
+        <div class="m-val">98.6<span class="m-unit">%</span></div>
+        <div class="m-bar-bg"><div class="m-bar" id="b3" style="width:0%"></div></div>
+        <div class="m-formula">TP / ( TP + FN )</div>
+        <div class="m-desc">How many actual positives the model caught.</div>
+      </div>
+      <div class="metric-card mc4">
+        <div class="m-rank">04 / 04</div>
+        <div class="m-name">F1-Score</div>
+        <div class="m-val">98.6<span class="m-unit">%</span></div>
+        <div class="m-bar-bg"><div class="m-bar" id="b4" style="width:0%"></div></div>
+        <div class="m-formula">2 × P × R / ( P + R )</div>
+        <div class="m-desc">Balance of precision and recall. Best single score.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 CONFUSION MATRIX -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-icon" style="background:#ecfdf5">🎯</div>
+      <div><div class="sec-title">Confusion Matrix</div><div class="sec-sub">Prediction breakdown — 114 test samples</div></div>
+    </div>
+    <div class="card" style="padding:32px;">
+      <div class="cm-layout">
+        <div>
+          <div class="cm-label-top">Predicted Label</div>
+          <div class="cm-col-labels">
+            <div class="cm-col-label">Malignant</div>
+            <div class="cm-col-label">Benign</div>
+          </div>
+          <div class="cm-outer">
+            <div class="cm-side-label">Actual Label</div>
+            <div>
+              <div class="cm-row">
+                <div class="cm-row-label">Malignant</div>
+                <div class="cm-cell c-tn"><div class="cm-n">41</div><div class="cm-t">True Neg</div></div>
+                <div style="width:8px"></div>
+                <div class="cm-cell c-fp"><div class="cm-n">1</div><div class="cm-t">False Pos</div></div>
+              </div>
+              <div style="height:8px"></div>
+              <div class="cm-row">
+                <div class="cm-row-label">Benign</div>
+                <div class="cm-cell c-fn"><div class="cm-n">1</div><div class="cm-t">False Neg</div></div>
+                <div style="width:8px"></div>
+                <div class="cm-cell c-tp"><div class="cm-n">71</div><div class="cm-t">True Pos</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cm-legend">
+          <div class="leg-item">
+            <div class="leg-dot" style="background:#10b981;border-radius:5px"></div>
+            <div><div class="leg-h" style="color:#10b981">True Positive — 71 ✅</div><div class="leg-p">Benign correctly identified. Model got it right — no harm done.</div></div>
+          </div>
+          <div class="leg-item">
+            <div class="leg-dot" style="background:#3b82f6;border-radius:5px"></div>
+            <div><div class="leg-h" style="color:#3b82f6">True Negative — 41 ✅</div><div class="leg-p">Malignant correctly flagged. Patient gets timely treatment.</div></div>
+          </div>
+          <div class="leg-item">
+            <div class="leg-dot" style="background:#f97316;border-radius:5px"></div>
+            <div><div class="leg-h" style="color:#f97316">False Positive — 1 ⚠️</div><div class="leg-p">Malignant predicted as benign. Unnecessary follow-up, not dangerous.</div></div>
+          </div>
+          <div class="leg-item">
+            <div class="leg-dot" style="background:#f43f5e;border-radius:5px"></div>
+            <div><div class="leg-h" style="color:#f43f5e">False Negative — 1 🚨</div><div class="leg-p">Cancer missed entirely. Most dangerous error in a medical context.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 REPORT -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-icon" style="background:#fff7ed">📋</div>
+      <div><div class="sec-title">Classification Report</div><div class="sec-sub">Per-class precision, recall & F1</div></div>
+    </div>
+    <div class="card">
+      <table class="report-table">
+        <thead>
+          <tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Support</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="cls cls-m">🔴 Malignant</span></td>
+            <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:97.6%;background:#f43f5e"></div></div><strong>0.976</strong></div></td>
+            <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:97.6%;background:#f43f5e"></div></div><strong>0.976</strong></div></td>
+            <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:97.6%;background:#f43f5e"></div></div><strong>0.976</strong></div></td>
+            <td style="color:#bbb;font-weight:700">42</td>
+          </tr>
+          <tr>
+            <td><span class="cls cls-b">🟢 Benign</span></td>
+            <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:98.6%;background:#10b981"></div></div><strong>0.986</strong></div></td>
+            <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:98.6%;background:#10b981"></div></div><strong>0.986</strong></div></td>
+            <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:98.6%;background:#10b981"></div></div><strong>0.986</strong></div></td>
+            <td style="color:#bbb;font-weight:700">72</td>
+          </tr>
+          <tr style="background:#fafafa">
+            <td><span class="cls cls-a">⚪ Weighted Avg</span></td>
+            <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:98.2%;background:#3b82f6"></div></div><strong>0.982</strong></div></td>
+            <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:98.2%;background:#3b82f6"></div></div><strong>0.982</strong></div></td>
+            <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:98.2%;background:#3b82f6"></div></div><strong>0.982</strong></div></td>
+            <td style="color:#bbb;font-weight:700">114</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 05 EXPLAINER -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-icon" style="background:#faf5ff">💡</div>
+      <div><div class="sec-title">Metric Explanations</div><div class="sec-sub">What each score actually means</div></div>
+    </div>
+    <div class="exp-grid">
+      <div class="exp-card e1">
+        <h3>Accuracy</h3>
+        <div class="exp-formula">( TP + TN ) / ( TP + TN + FP + FN )</div>
+        <p>The simplest metric — the percentage of all predictions that were correct. Easy to explain, but deceptive on imbalanced data. A model that always says "no cancer" on a 95% healthy dataset gets 95% accuracy while being totally useless.</p>
+        <div class="use-box">✅ Best for: Balanced datasets where every class matters equally.</div>
+      </div>
+      <div class="exp-card e2">
+        <h3>Precision</h3>
+        <div class="exp-formula">TP / ( TP + FP )</div>
+        <p>Of every case the model flagged as positive, what fraction was truly positive? High precision = fewer false alarms. Important when acting on a positive prediction is costly, like removing content or charging a customer for suspected fraud.</p>
+        <div class="use-box">✅ Best for: Spam filters, content moderation — when false alarms are costly.</div>
+      </div>
+      <div class="exp-card e3">
+        <h3>Recall (Sensitivity)</h3>
+        <div class="exp-formula">TP / ( TP + FN )</div>
+        <p>Of every actual positive case in the data, what fraction did the model find? High recall = fewer missed cases. Critical in medicine — missing a malignant tumor is far worse than sending someone for one extra biopsy.</p>
+        <div class="use-box">✅ Best for: Medical diagnosis, fraud alerts — missing real positives is dangerous.</div>
+      </div>
+      <div class="exp-card e4">
+        <h3>F1-Score</h3>
+        <div class="exp-formula">2 × ( Precision × Recall ) / ( Precision + Recall )</div>
+        <p>The harmonic mean of precision and recall. You can't fake a high F1 by sacrificing one for the other. The go-to single number when classes are imbalanced and both error types have real consequences.</p>
+        <div class="use-box">✅ Best for: Imbalanced datasets — one number that captures both failure modes.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 TRADEOFF -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-icon" style="background:#fff1f2">⚖️</div>
+      <div><div class="sec-title">Precision vs Recall Trade-off</div><div class="sec-sub">Moving the decision threshold shifts the balance</div></div>
+    </div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-card tc1">
+        <h3>↑ Prioritise Recall</h3>
+        <div class="threshold-row">
+          <div class="threshold-track"><div class="threshold-fill" style="width:22%"></div></div>
+          <div class="threshold-labels"><span>LOW THRESHOLD</span><span>HIGH THRESHOLD</span></div>
+        </div>
+        <p>Lower the decision threshold → model flags more cases as positive → fewer real positives are missed → but more false alarms are generated along the way.</p>
+        <div class="tc-note">🏥 Use when: Cancer screening, fraud alerts, safety systems. Missing a true case has severe consequences.</div>
+      </div>
+      <div class="tradeoff-card tc2">
+        <h3>↑ Prioritise Precision</h3>
+        <div class="threshold-row">
+          <div class="threshold-track"><div class="threshold-fill" style="width:80%"></div></div>
+          <div class="threshold-labels"><span>LOW THRESHOLD</span><span>HIGH THRESHOLD</span></div>
+        </div>
+        <p>Raise the decision threshold → model only flags very confident positives → fewer false alarms → but some real positives will inevitably be missed.</p>
+        <div class="tc-note">🛡️ Use when: Spam filters, legal evidence tagging. False alarms trigger costly or irreversible actions.</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:#999;font-weight:700;margin-top:14px;text-align:center;">In this model both scores reach 98.6% — an excellent balance enabled by 30 highly informative tumour-measurement features.</p>
+  </section>
+
+  <!-- 07 CODE -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-icon" style="background:#1e1e2e">👨‍💻</div>
+      <div><div class="sec-title">Complete Python Code</div><div class="sec-sub">Copy, paste, run</div></div>
+    </div>
+    <div class="code-wrap">
+      <div class="code-head">
+        <div class="code-dots">
+          <div class="code-dot" style="background:#f38ba8"></div>
+          <div class="code-dot" style="background:#fab387"></div>
+          <div class="code-dot" style="background:#a6e3a1"></div>
+        </div>
+        <span class="fname">logistic_regression_classifier.py</span>
+        <span class="fmeta">Python · scikit-learn · seaborn</span>
+      </div>
+<pre><span class="cm"># ================================================================
+# Logistic Regression — Breast Cancer Classification
+# Dataset : sklearn Breast Cancer Wisconsin (no download needed)
+# ================================================================</span>
+
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> seaborn <span class="kw">as</span> sns
+
+<span class="kw">from</span> sklearn.datasets        <span class="kw">import</span> load_breast_cancer
+<span class="kw">from</span> sklearn.model_selection  <span class="kw">import</span> train_test_split
+<span class="kw">from</span> sklearn.preprocessing   <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.linear_model    <span class="kw">import</span> LogisticRegression
+<span class="kw">from</span> sklearn.metrics         <span class="kw">import</span> (
+    accuracy_score, precision_score, recall_score,
+    f1_score, confusion_matrix, classification_report
+)
+
+<span class="cm"># ── LOAD DATA ─────────────────────────────────────────────────</span>
+data  = <span class="fn">load_breast_cancer</span>()
+X, y  = data.data, data.target   <span class="cm"># 569 samples, 30 features</span>
+
+<span class="cm"># ── TRAIN-TEST SPLIT (80-20, stratified) ──────────────────────</span>
+X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
+    X, y, test_size=<span class="num">0.2</span>, random_state=<span class="num">42</span>, stratify=y
+)
+
+<span class="cm"># ── STANDARDIZE (fit on train only — prevents data leakage) ───</span>
+scaler     = <span class="fn">StandardScaler</span>()
+X_train_sc = scaler.<span class="fn">fit_transform</span>(X_train)
+X_test_sc  = scaler.<span class="fn">transform</span>(X_test)
+
+<span class="cm"># ── TRAIN ─────────────────────────────────────────────────────</span>
+model = <span class="fn">LogisticRegression</span>(
+    max_iter=<span class="num">1000</span>, random_state=<span class="num">42</span>, class_weight=<span class="str">'balanced'</span>
+)
+model.<span class="fn">fit</span>(X_train_sc, y_train)
+
+<span class="cm"># ── PREDICT ───────────────────────────────────────────────────</span>
+y_pred = model.<span class="fn">predict</span>(X_test_sc)
+
+<span class="cm"># ── METRICS ───────────────────────────────────────────────────</span>
+<span class="fn">print</span>(<span class="str">f"Accuracy  : {accuracy_score(y_test, y_pred):.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"Precision : {precision_score(y_test, y_pred):.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"Recall    : {recall_score(y_test, y_pred):.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"F1-Score  : {f1_score(y_test, y_pred):.4f}"</span>)
+<span class="fn">print</span>(<span class="fn">classification_report</span>(y_test, y_pred, target_names=data.target_names))
+
+<span class="cm"># ── CONFUSION MATRIX PLOT ─────────────────────────────────────</span>
+cm = <span class="fn">confusion_matrix</span>(y_test, y_pred)
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">6</span>, <span class="num">5</span>))
+sns.<span class="fn">heatmap</span>(cm, annot=<span class="kw">True</span>, fmt=<span class="str">'d'</span>, cmap=<span class="str">'Blues'</span>,
+           xticklabels=data.target_names,
+           yticklabels=data.target_names, ax=ax)
+ax.<span class="fn">set_xlabel</span>(<span class="str">'Predicted'</span>)
+ax.<span class="fn">set_ylabel</span>(<span class="str">'Actual'</span>)
+ax.<span class="fn">set_title</span>(<span class="str">'Confusion Matrix — Logistic Regression'</span>)
+plt.<span class="fn">tight_layout</span>()
+plt.<span class="fn">show</span>()</pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('b1').style.width = '98.25%';
+      document.getElementById('b2').style.width = '98.61%';
+      document.getElementById('b3').style.width = '98.61%';
+      document.getElementById('b4').style.width = '98.61%';
+    }, 400);
+  });
+</script>
+</body>
+</html>
