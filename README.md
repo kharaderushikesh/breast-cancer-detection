@@ -14,7 +14,7 @@ logistic_regression_project/
 ├── logistic_regression.py   ← Main ML script (run this)  
 ├── requirements.txt         ← Python dependencies  
 ├── README.md                ← You are here  
-│ 
+
 ├── [BREAST_CANCER_DETECTION.html](./BREAST_CANCER_DETECTION.html) ← Click to open HTML report
 
 └── outputs/                 ← Auto-created when you run the script  
