@@ -4,7 +4,6 @@ A complete, beginner-friendly machine learning project using Logistic Regression
 
 ---
 
-## 📁 Project Structure
 
 
 ## 📁 Project Structure
