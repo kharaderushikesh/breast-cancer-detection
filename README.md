@@ -17,6 +17,8 @@ logistic_regression_project/
 
 ├── [BREAST_CANCER_DETECTION.html](./BREAST_CANCER_DETECTION.html) ← Click to open HTML report
 
+[🔗 Open HTML Report](https://htmlpreview.github.io/?https://github.com/kharaderushikesh/breast-cancer-detection/blob/main/BREAST_CANCER_DETECTION.html)
+
 └── outputs/                 ← Auto-created when you run the script  
 ├── dataset_head.csv         First 5 rows of the dataset  
 ├── metrics.csv              Accuracy, Precision, Recall, F1  
