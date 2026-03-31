@@ -14,7 +14,8 @@ logistic_regression_project/
 ├── logistic_regression.py   ← Main ML script (run this)  
 ├── requirements.txt         ← Python dependencies  
 ├── README.md                ← You are here  
-│  
+│ 
+├── [BREST_CANCER_DETECTION.html](./BREST_CANCER_DETECTION.html) ← Click to open HTML report
 └── outputs/                 ← Auto-created when you run the script  
 ├── dataset_head.csv         First 5 rows of the dataset  
 ├── metrics.csv              Accuracy, Precision, Recall, F1  
