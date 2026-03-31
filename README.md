@@ -15,9 +15,9 @@ logistic_regression_project/
 ├── requirements.txt         ← Python dependencies  
 ├── README.md                ← You are here  
 
-├── [BREAST_CANCER_DETECTION.html](./BREAST_CANCER_DETECTION.html) ← Click to open HTML report
 
-[🔗 Open HTML Report](https://htmlpreview.github.io/?https://github.com/kharaderushikesh/breast-cancer-detection/blob/main/BREAST_CANCER_DETECTION.html)
+├──  [🔗 Open HTML Report](https://htmlpreview.github.io/?https://github.com/kharaderushikesh/breast-cancer-detection/blob/main/BREAST_CANCER_DETECTION.html)   ← Click to open HTML report
+
 
 └── outputs/                 ← Auto-created when you run the script  
 ├── dataset_head.csv         First 5 rows of the dataset  
